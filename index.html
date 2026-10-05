@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clase UNIFRANZ: Abstracción, Interfaces y Git</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2f;
+            --text-color: #f8f8f2;
+            --primary-color: #ff6b35; /* Naranja UNIFRANZ */
+            --secondary-color: #2a2a40;
+            --accent-color: #50fa7b;
+            --code-bg: #282a36;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* Contenedor principal de diapositivas */
+        #presentation {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            transform: scale(0.95);
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        /* Tipografía y estilos de contenido */
+        h1 {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        p, ul, ol {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            max-width: 900px;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Cajas de Código */
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-color);
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1.2rem;
+            overflow-x: auto;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .keyword { color: #ff79c6; }
+        .type { color: #8be9fd; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; }
+
+        /* Botones Interactivos */
+        .btn-reveal {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-reveal:hover {
+            background-color: #e55a2b;
+            transform: scale(1.05);
+        }
+
+        .hidden-content {
+            display: none;
+            margin-top: 20px;
+            background-color: var(--secondary-color);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--accent-color);
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        /* Controles de Navegación */
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-btn:hover {
+            background-color: white;
+            color: var(--bg-color);
+        }
+
+        /* Barra de progreso */
+        #progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* Logo UNIFRANZ Flotante */
+        .logo-unifranz {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: white;
+            letter-spacing: 2px;
+            opacity: 0.5;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Layout dividido para teoría/código */
+        .split-layout {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .split-layout > div {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo-unifranz">UNIFRANZ | Ing. en Sistemas</div>
+
+    <div id="presentation">
+        
+        <!-- Diapositiva 1: Portada -->
+        <div class="slide active">
+            <h1>Arquitectos del Código</h1>
+            <h2>Abstracción, Interfaces y el Poder de Git</h2>
+            <p style="text-align: center; color: #aaa;">Clase Interactiva - Primer Semestre<br>Preparado para la Generación de Innovación Digital</p>
+            <p style="margin-top: 40px; font-size: 1rem; color: #888;">(Usa las flechas del teclado ⬅️ ➡️ para avanzar)</p>
+        </div>
+
+        <!-- Diapositiva 2: El Problema -->
+        <div class="slide">
+            <h2>El Caos del Trabajo en Equipo</h2>
+            <p>Imagina que te contratan en un equipo de 10 personas para crear el próximo RPG exitoso.</p>
+            <p>Todos abren el archivo <code style="color:var(--accent-color)">Personaje.cs</code> y empiezan a escribir sus ideas al mismo tiempo y se lo pasan por WhatsApp.</p>
+            <button class="btn-reveal" onclick="revealContent('reveal1')">¿Qué creen que pasará el día de la entrega?</button>
+            <div id="reveal1" class="hidden-content">
+                <ul>
+                    <li>🔥 Alguien borrará accidentalmente el código del otro.</li>
+                    <li>🔥 Habrá 10 versiones distintas del mismo archivo.</li>
+                    <li>🔥 ¡Nadie sabrá por qué el juego no compila!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Diapositiva 3: La Solución -->
+        <div class="slide">
+            <h2>La Solución de los Profesionales</h2>
+            <p>Para evitar el caos, las empresas tecnológicas utilizan una fórmula de tres pasos:</p>
+            <ul>
+                <li><span class="highlight">Modularidad:</span> Dividir el problema. Cada programador hace un archivo distinto.</li>
+                <li><span class="highlight">POO (Contratos y Moldes):</span> Reglas estrictas para que los archivos de todos encajen perfectamente. (Abstracción e Interfaces).</li>
+                <li><span class="highlight">Control de Versiones (Git):</span> La herramienta mágica que fusiona el trabajo de todo el equipo en la nube de forma segura.</li>
+            </ul>
+        </div>
+
+        <!-- Diapositiva 4: Abstracción -->
+        <div class="slide">
+            <div class="split-layout">
+                <div>
+                    <h2>1. Abstracción (El Molde Base)</h2>
+                    <p>Una <strong>Clase Abstracta</strong> es un plano incompleto. Define la <em>identidad o genética</em> principal, pero deja "huecos" intencionales.</p>
+                    <ul>
+                        <li><span class="highlight">Regla de Oro:</span> ¡NO puedes usar <code>new</code> directamente en una clase abstracta!</li>
+                        <li>Obliga a sus clases hijas a programar los métodos marcados como <code>abstract</code>.</li>
+                    </ul>
+                    <button class="btn-reveal" onclick="revealContent('reveal2')">💡 Curiosidad</button>
+                    <div id="reveal2" class="hidden-content">
+                        <p style="font-size: 1.2rem;">Si tu clase hija no programa el método abstracto, <strong>Visual Studio marcará error rojo en toda la clase</strong>. ¡Es un molde obligatorio!</p>
+                    </div>
+                </div>
+                <div>
+<pre>
+<span class="comment">// 1. El padre (Molde base)</span>
+<span class="keyword">public abstract class</span> <span class="type">SerMitologico</span>
+{
+    <span class="keyword">public string</span> Nombre { <span class="keyword">get</span>; <span class="keyword">set</span>; }
+    
+    <span class="comment">// Método abstracto (Sin llaves, sin código)</span>
+    <span class="comment">// Obliga al hijo a decir CÓMO ataca</span>
+    <span class="keyword">public abstract void</span> Atacar(); 
+}
+
+<span class="comment">// 2. El hijo (El objeto real)</span>
+<span class="keyword">public class</span> <span class="type">Duende</span> : <span class="type">SerMitologico</span>
+{
+    <span class="comment">// ¡El 'override' es obligatorio!</span>
+    <span class="keyword">public override void</span> Atacar()
+    {
+        Console.WriteLine(<span class="string">"El duende lanza una piedra"</span>);
+    }
+}
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 5: Interfaces -->
+        <div class="slide">
+            <div class="split-layout">
+                <div>
+                    <h2>2. Interfaces (El Contrato)</h2>
+                    <p>Mientras la abstracción dice <em>"qué eres"</em>, la interfaz dice <em>"qué sabes hacer"</em>.</p>
+                    <ul>
+                        <li>No tiene código, variables, ni lógica. Solo promesas.</li>
+                        <li>En C#, solo puedes heredar de <strong>UNA</strong> clase padre, ¡pero puedes firmar <strong>MÚLTIPLES</strong> contratos (interfaces)!</li>
+                        <li>Por convención profesional, siempre inician con la letra <strong>I</strong>.</li>
+                    </ul>
+                    <button class="btn-reveal" onclick="revealContent('reveal3')">💡 Curiosidad</button>
+                    <div id="reveal3" class="hidden-content">
+                        <p style="font-size: 1.2rem;">¿Sabías que en una interfaz no se escribe la palabra <code>public</code> en sus métodos? ¡Todo dentro de una interfaz es público y abstracto por defecto!</p>
+                    </div>
+                </div>
+                <div>
+<pre>
+<span class="comment">// 1. Los Contratos</span>
+<span class="keyword">public interface</span> <span class="type">IMagico</span>
+{
+    <span class="keyword">void</span> LanzarHechizo(); <span class="comment">// Sin 'public'</span>
+}
+
+<span class="keyword">public interface</span> <span class="type">IVolador</span>
+{
+    <span class="keyword">void</span> Volar();
+}
+
+<span class="comment">// 2. La clase firma los contratos múltiples</span>
+<span class="keyword">public class</span> <span class="type">Supay</span> : <span class="type">SerMitologico</span>, <span class="type">IMagico</span>, <span class="type">IVolador</span>
+{
+    <span class="keyword">public override void</span> Atacar() { ... }
+    
+    <span class="keyword">public void</span> LanzarHechizo() { ... }
+    <span class="keyword">public void</span> Volar() { ... }
+}
+</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diapositiva 6: Live Coding -->
+        <div class="slide">
+            <h2>💻 Momento de Live Coding</h2>
+            <p>Pasemos a Visual Studio.</p>
+            <p>Demostraremos en vivo qué pasa si intentamos instanciar una clase abstracta o si rompemos un contrato de interfaz.</p>
+            <p style="font-size: 1.2rem; color: #888;">(Docente: Minimiza esta presentación y abre tu Visual Studio)</p>
+        </div>
+
+        <!-- Diapositiva 7: Git y GitHub -->
+        <div class="slide">
+            <h2>El Puente entre Nosotros: GIT</h2>
+            <p>Ya sabemos hacer piezas modulares e independientes usando POO. ¿Cómo las unimos al proyecto del Docente (Líder Técnico)?</p>
+            <ol>
+                <li><span class="highlight">Fork (Bifurcar):</span> Haces una copia exacta de mi repositorio en tu cuenta de GitHub.</li>
+                <li><span class="highlight">Clone (Clonar):</span> Descargas tu copia a Visual Studio.</li>
+                <li><span class="highlight">Commit & Push:</span> Programas tu clase, guardas localmente y subes a tu nube.</li>
+                <li><span class="highlight">Pull Request (PR):</span> Me envías una solicitud diciendo: <em>"Profe, termine mi clase, únela al juego principal"</em>.</li>
+            </ol>
+        </div>
+
+        <!-- Diapositiva 8: La Misión -->
+        <div class="slide">
+            <h1>La Misión de Hoy</h1>
+            <h2>⚔️ Arena de Mitos y Leyendas ⚔️</h2>
+            <p>He construido el "Motor de la Arena" en mi repositorio, pero está vacío. Necesito que ustedes creen a los combatientes y me los envíen.</p>
+            <p>Trabajarán de forma independiente. Si respetan el <strong>molde abstracto</strong> y el <strong>contrato de la interfaz</strong>, cuando yo acepte su Pull Request en GitHub, ¡sus personajes cobrarán vida en mi computadora sin que haya ni un solo error!</p>
+        </div>
+
+        <!-- Diapositiva 9: Paso a Paso del Ejercicio -->
+        <div class="slide">
+            <h2>Guía del Estudiante (Paso a Paso)</h2>
+            <div style="background-color: var(--secondary-color); padding: 25px; border-radius: 10px; text-align: left; max-width: 900px; width: 100%;">
+                <ol style="margin-top: 0;">
+                    <li>Entra al enlace de GitHub del docente y haz clic en <strong>Fork</strong>.</li>
+                    <li>Abre Visual Studio 2022 y haz clic en <strong>Clonar un Repositorio</strong> (pega la URL de tu Fork).</li>
+                    <li>En el proyecto, crea una nueva clase con el nombre de tu criatura (Ej. <code>Sirena.cs</code>).</li>
+                    <li>Haz que herede de <code>SerMitologico</code> y cumpla el <code>override</code> de <code>Atacar()</code>.</li>
+                    <li>Haz que implemente la interfaz <code>IRecompensable</code> y programa el método <code>SoltarBotin()</code>.</li>
+                    <li>Ve a "Cambios de Git", escribe qué hiciste, y haz clic en <strong>Confirmar todo e Insertar</strong>.</li>
+                    <li>Ve a tu GitHub y haz clic en <strong>Contribute -> Open Pull Request</strong>.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Diapositiva 10: Final -->
+        <div class="slide">
+            <h1>¡Manos al Código!</h1>
+            <h2>Esperando los Pull Requests...</h2>
+            <p>La próxima clase iniciaremos proyectando la batalla.</p>
+            <p>Revisaremos sus Pull Requests en vivo. Si el contrato se cumplió, apruebo el código y su personaje entrará a la Arena.</p>
+            <div style="margin-top: 40px; font-size: 5rem;">🚀</div>
+        </div>
+
+        <!-- Navegación -->
+        <div class="controls">
+            <button class="nav-btn" onclick="prevSlide()" title="Anterior">◀</button>
+            <button class="nav-btn" onclick="nextSlide()" title="Siguiente">▶</button>
+        </div>
+        <div id="progress-bar"></div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progress-bar');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if(index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            // Actualizar barra de progreso
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function nextSlide() {
+            if(currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if(currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        // Navegación por teclado
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if(e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Función para mostrar curiosidades dinámicas
+        function revealContent(id) {
+            const content = document.getElementById(id);
+            if(content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        }
+
+        // Iniciar
+        updateSlide();
+    </script>
+</body>
+</html>
